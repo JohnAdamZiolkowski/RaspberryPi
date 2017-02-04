@@ -1,15 +1,41 @@
 import time
+import RPi.GPIO as gpio
 
-example_weather = dict()
-example_weather["temp"] = "-26"
+gpio.setmode(gpio.BOARD)
+gpio.setwarnings(False)
 
-example_weather["wet"] = dict()
-example_weather["wet"]["type"] = "rain"
-example_weather["wet"]["chance"] = "90"
+red_pin = 12
+green_pin = 32
+blue_pin = 36
 
-example_weather["wind"] = "4"
+gpio.setup(red_pin, gpio.OUT)
+gpio.setup(green_pin, gpio.OUT)
+gpio.setup(blue_pin, gpio.OUT)
 
-example_weather["alert"] = True
+
+def rgb(red_on, green_on, blue_on):
+    gpio.output(red, red_on)
+    gpio.output(green, green_on)
+    gpio.output(blue, blue_on)
+
+
+full = 255
+
+
+def render_color(red_level, green_level, blue_level, length):
+    ticks = length * 100
+
+    for t in range(ticks):
+        tick = t & full
+
+        red_on = tick < red_level
+        green_on = tick < green_level
+        blue_on = tick < blue_level
+
+        gpio.output(red_pin, red_on)
+        gpio.output(green_pin, green_on)
+        gpio.output(blue_pin, blue_on)
+
 
 red = (255, 0, 0)
 orange = (255, 128, 0)
@@ -19,7 +45,7 @@ miku = (0, 255, 255)
 blue = (0, 0, 255)
 purple = (255, 0, 255)
 
-white = (255, 0, 0)
+white = (255, 255, 255)
 half_white = (128, 128, 128)
 off = (0, 0, 0)
 
@@ -38,10 +64,10 @@ def display(color, number):
 
     time_each = pad_number(number) / 2
 
-    set_rgb(red_level, green_level, blue_level)
+    render_color(red_level, green_level, blue_level, number)
     time.sleep(time_each)
 
-    set_rgb(0, 0, 0)
+    render_color(0, 0, 0, number)
     time.sleep(time_each)
 
 
@@ -51,18 +77,19 @@ def render_weather(weather):
     render_wet(weather)
     render_wind(weather)
     render_alert(weather)
+    display(off, 1)
 
 
 def render_temp(weather):
     print("rendering temp")
+    time.sleep(1)
     temp = int(weather["temp"])
     negative = temp < 0
     temp = abs(temp)
     temp_string = str(temp)
 
     if temp == 0:
-        set_rgb(255, 0, 255)
-        time.sleep(1)
+        display(yellow, 1)
         return
 
     for digit in range(len(temp_string)):
@@ -73,15 +100,17 @@ def render_temp(weather):
             else:
                 display(orange, value)
 
+        time.sleep(0.5)
+
 
 def render_wet(weather):
     print("rendering wet")
+    time.sleep(1)
     type_of_wet = weather["wet"]["type"]
     chance = int(weather["wet"]["chance"]) / 10
 
     if chance <= 0:
-        set_rgb(255, 255, 0)
-        time.sleep(1)
+        display(yellow, 1)
 
     else:
         for i in range(chance):
@@ -91,29 +120,44 @@ def render_wet(weather):
             elif type_of_wet == "snow":
                 display(white, chance)
 
+            time.sleep(0.5)
+
 
 def render_wind(weather):
     print("rendering wind")
+    time.sleep(1)
     wind_level = int(weather["wind"])
     if wind_level <= 0:
         return
 
     for i in range(wind_level):
-        display(half_white, wind_level)
+        display(white, wind_level)
 
 
 def render_alert(weather):
     print("rendering alert")
+    time.sleep(1)
     alert = weather["alert"]
     if not alert:
         return
 
-    for i in range(10):
-        display(red, 10)
+    for i in range(9):
+        display(red, 9)
 
 
 def set_rgb(red_level, green_level, blue_level):
     print("setting to:", red_level, green_level, blue_level)
 
+
+example_weather = dict()
+example_weather["temp"] = "-26"
+
+example_weather["wet"] = dict()
+example_weather["wet"]["type"] = "rain"
+example_weather["wet"]["chance"] = "90"
+
+example_weather["wind"] = "4"
+
+example_weather["alert"] = True
 
 render_weather(example_weather)
