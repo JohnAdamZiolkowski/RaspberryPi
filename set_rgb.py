@@ -21,7 +21,7 @@ full = 255
 
 red_level = 64
 green_level = 0
-blue_level = 32
+blue_level = 128
 
 tick = 0
 while True:

@@ -57,6 +57,7 @@ R = 880 ROhm
 
 BLUE:
 2 blue wires
-3 220 ROhm resistors
-R = 660 ROhm
+4 220 ROhm resistors
+1 270 ROhm resistor???
+R = 880 ROhm
 
