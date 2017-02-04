@@ -1,0 +1,62 @@
+notes
+
+
+RPi voltage in: 3.3 Volt (V)
+
+Yellow LED voltage drop: 1.8 Volt (V)
+
+Yellow LED desired current: 25 milliAmpere (mA)
+
+Remaining voltage: 1.5 Volt (V)
+
+
+V = I * R
+
+R = V / I
+
+I = V / R
+
+Desired resistance: 
+R = V / I
+R = 1.5V / 25mA
+R = 1.5V / 0.0025
+R = 600 ROhm
+
+Resistors I have available:
+220 ROhm
+
+
+Resistors for Circuit:
+R = 3 * 220 ROhm
+R = 660 ROhm
+
+Current for Resistor?:
+I = V / R
+I = 1.5V / 660 ROhm
+I = 0.00227 A
+I = 22.7 mA
+
+
+
+
+
+RGB LED Circuit
+1 RGB LED
+3 GPIO set for output
+1 black wire (ground)
+
+RED:
+2 red wires
+3 220 ROhm resistors
+R = 660 ROhm
+
+GREEN:
+2 green wires
+4 220 ROhm resistors
+R = 880 ROhm
+
+BLUE:
+2 blue wires
+3 220 ROhm resistors
+R = 660 ROhm
+
