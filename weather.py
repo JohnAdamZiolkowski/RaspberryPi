@@ -12,31 +12,7 @@ gpio.setup(red_pin, gpio.OUT)
 gpio.setup(green_pin, gpio.OUT)
 gpio.setup(blue_pin, gpio.OUT)
 
-
-def rgb(red_on, green_on, blue_on):
-    gpio.output(red, red_on)
-    gpio.output(green, green_on)
-    gpio.output(blue, blue_on)
-
-
-full = 255
-
-
-def render_color(red_level, green_level, blue_level, length):
-    ticks = length * 100
-
-    for t in range(ticks):
-        tick = t & full
-
-        red_on = tick < red_level
-        green_on = tick < green_level
-        blue_on = tick < blue_level
-
-        gpio.output(red_pin, red_on)
-        gpio.output(green_pin, green_on)
-        gpio.output(blue_pin, blue_on)
-
-
+# define colors
 red = (255, 0, 0)
 orange = (255, 128, 0)
 yellow = (255, 255, 0)
@@ -50,33 +26,67 @@ half_white = (128, 128, 128)
 off = (0, 0, 0)
 
 
+def rgb(red_on, green_on, blue_on):
+    gpio.output(red_pin, red_on)
+    gpio.output(green_pin, green_on)
+    gpio.output(blue_pin, blue_on)
+
+
+full = 255
+
+
+def render_color(red_level, green_level, blue_level, length):
+    start_time = time.time()
+    end_time = start_time + length
+
+    tick = 0
+    while time.time() < end_time:
+        tick += 1
+        if tick > full:
+            tick = 0
+
+        red_on = tick < red_level
+        green_on = tick < green_level
+        blue_on = tick < blue_level
+
+        gpio.output(red_pin, red_on)
+        gpio.output(green_pin, green_on)
+        gpio.output(blue_pin, blue_on)
+
+
 def pad_number(number):
     if number == 0:
         return 1
     else:
-        return (1 + number * 0.25) / number
+        return (1 + number * 0.5) / number
 
 
-def display(color, number):
+def display_count(color, number):
+    time_each = pad_number(number)
+    down_color = (color[0] / 8, color[1] / 8, color[2] / 8)
+
+    display(down_color, 0.5)
+    for i in range(number):
+        display(color, time_each / 2)
+        display(down_color, time_each / 2)
+    display(down_color, 0.5)
+
+
+def display(color, length):
     red_level = color[0]
     green_level = color[1]
     blue_level = color[2]
 
-    time_each = pad_number(number) / 2
-
-    render_color(red_level, green_level, blue_level, number)
-    time.sleep(time_each)
-
-    render_color(0, 0, 0, number)
-    time.sleep(time_each)
+    render_color(red_level, green_level, blue_level, length)
 
 
 def render_weather(weather):
     print("rendering weather")
-    render_temp(weather)
+    display(off, 1)
+    # render_alert(weather)
+    # render_temp(weather)
     render_wet(weather)
-    render_wind(weather)
-    render_alert(weather)
+    # render_wind(weather)
     display(off, 1)
 
 
@@ -100,8 +110,6 @@ def render_temp(weather):
             else:
                 display(orange, value)
 
-        time.sleep(0.5)
-
 
 def render_wet(weather):
     print("rendering wet")
@@ -110,17 +118,13 @@ def render_wet(weather):
     chance = int(weather["wet"]["chance"]) / 10
 
     if chance <= 0:
-        display(yellow, 1)
+        display_count(yellow, 1)
 
     else:
-        for i in range(chance):
-            if type_of_wet == "rain":
-                display(blue, chance)
-                time.sleep(pad_number(chance))
-            elif type_of_wet == "snow":
-                display(white, chance)
-
-            time.sleep(0.5)
+        if type_of_wet == "rain":
+            display_count(blue, chance)
+        elif type_of_wet == "snow":
+            display_count(white, chance)
 
 
 def render_wind(weather):
@@ -131,7 +135,7 @@ def render_wind(weather):
         return
 
     for i in range(wind_level):
-        display(white, wind_level)
+        display(purple, wind_level)
 
 
 def render_alert(weather):
