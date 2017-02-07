@@ -14,10 +14,10 @@ gpio.setup(blue_pin, gpio.OUT)
 
 # define colors
 red = (255, 0, 0)
-orange = (255, 128, 0)
-yellow = (255, 255, 0)
+orange = (255, 32, 0)
+yellow = (255, 96, 0)
 green = (0, 255, 0)
-miku = (0, 255, 255)
+miku = (0, 128, 255)
 blue = (0, 0, 255)
 purple = (255, 0, 255)
 
@@ -71,6 +71,8 @@ def display_count(color, number):
         display(down_color, time_each / 2)
     display(down_color, 0.5)
 
+    rgb(False, False, False)
+
 
 def display(color, length):
     red_level = color[0]
@@ -82,42 +84,50 @@ def display(color, length):
 
 def render_weather(weather):
     print("rendering weather")
-    display(off, 1)
-    # render_alert(weather)
-    # render_temp(weather)
+    render_alert(weather)
+    render_temp(weather)
     render_wet(weather)
-    # render_wind(weather)
+    render_wind(weather)
     display(off, 1)
+
+
+def render_alert(weather):
+    print("rendering alert")
+    display(off, 1)
+    alert = weather["alert"]
+    if not alert:
+        return
+
+    display_count(red, 9)
 
 
 def render_temp(weather):
     print("rendering temp")
-    time.sleep(1)
+    display(off, 1)
     temp = int(weather["temp"])
     negative = temp < 0
     temp = abs(temp)
     temp_string = str(temp)
 
     if temp == 0:
-        display(yellow, 1)
+        display_count(yellow, 1)
         return
 
     for digit in range(len(temp_string)):
         value = int(temp_string[digit])
-        for i in range(value):
-            if negative:
-                display(miku, value)
-            else:
-                display(orange, value)
+        if negative:
+            display_count(miku, value)
+        else:
+            display_count(orange, value)
 
 
 def render_wet(weather):
     print("rendering wet")
-    time.sleep(1)
+    display(off, 1)
     type_of_wet = weather["wet"]["type"]
     chance = int(weather["wet"]["chance"]) / 10
 
-    if chance <= 0:
+    if chance <= 0 or type_of_wet == "none":
         display_count(yellow, 1)
 
     else:
@@ -129,39 +139,48 @@ def render_wet(weather):
 
 def render_wind(weather):
     print("rendering wind")
-    time.sleep(1)
+    display(off, 1)
     wind_level = int(weather["wind"])
     if wind_level <= 0:
         return
 
-    for i in range(wind_level):
-        display(purple, wind_level)
-
-
-def render_alert(weather):
-    print("rendering alert")
-    time.sleep(1)
-    alert = weather["alert"]
-    if not alert:
-        return
-
-    for i in range(9):
-        display(red, 9)
+    display_count(purple, wind_level)
 
 
 def set_rgb(red_level, green_level, blue_level):
     print("setting to:", red_level, green_level, blue_level)
 
 
-example_weather = dict()
-example_weather["temp"] = "-26"
+example_weather = {
+    "alert": True,
+    "temp": "-26",
+    "wet": {
+        "type": "snow",
+        "chance": "90"
+    },
+    "wind": "4"
+}
 
-example_weather["wet"] = dict()
-example_weather["wet"]["type"] = "rain"
-example_weather["wet"]["chance"] = "90"
+example_weather2 = {
+    "alert": False,
+    "temp": "31",
+    "wet": {
+        "type": "rain",
+        "chance": "10"
+    },
+    "wind": "1"
+}
 
-example_weather["wind"] = "4"
-
-example_weather["alert"] = True
+example_weather3 = {
+    "alert": False,
+    "temp": "70",
+    "wet": {
+        "type": "none",
+        "chance": "0"
+    },
+    "wind": "0"
+}
 
 render_weather(example_weather)
+render_weather(example_weather2)
+render_weather(example_weather3)
