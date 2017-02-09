@@ -9,9 +9,13 @@ red_pin = 12
 green_pin = 32
 blue_pin = 36
 
+switch_pin = 11
+
 gpio.setup(red_pin, gpio.OUT)
 gpio.setup(green_pin, gpio.OUT)
 gpio.setup(blue_pin, gpio.OUT)
+
+gpio.setup(switch_pin, gpio.IN)
 
 # define colors
 red = (255, 0, 0)
@@ -24,6 +28,7 @@ purple = (255, 0, 255)
 
 white = (255, 255, 255)
 half_white = (128, 128, 128)
+dim = (1, 1, 1)
 off = (0, 0, 0)
 
 
@@ -94,10 +99,10 @@ def render_weather(weather):
 
 def render_alert(weather):
     print("rendering alert")
-    display(off, 1)
     alert = weather["alert"]
     if not alert:
         return
+    display(off, 1)
 
     display_count(red, 9)
 
@@ -148,10 +153,6 @@ def render_wind(weather):
     display_count(purple, wind_level)
 
 
-def set_rgb(red_level, green_level, blue_level):
-    print("setting to:", red_level, green_level, blue_level)
-
-
 example_weather = {
     "alert": True,
     "temp": "-26",
@@ -187,7 +188,25 @@ example_weather3 = {
 # render_weather(example_weather3)
 
 api = WeatherAPI()
-weather = api.get_forecast()
-print(weather)
 
-render_weather(weather)
+while True:
+    display(dim, 1)
+    display(off, 1)
+
+    switch_pressed = gpio.input(switch_pin)
+    # print(switch_pressed)
+
+    if switch_pressed:
+        display(green, 0.5)
+
+        try:
+            api = WeatherAPI()
+            weather = api.get_forecast()
+            print(weather)
+            render_weather(weather)
+
+        except Exception as ex:
+            print(ex)
+            display(red, 5)
+
+
