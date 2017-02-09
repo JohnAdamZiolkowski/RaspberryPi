@@ -1,5 +1,6 @@
 import time
 import RPi.GPIO as gpio
+from weather_api import WeatherAPI
 
 gpio.setmode(gpio.BOARD)
 gpio.setwarnings(False)
@@ -125,16 +126,16 @@ def render_wet(weather):
     print("rendering wet")
     display(off, 1)
     type_of_wet = weather["wet"]["type"]
-    chance = int(weather["wet"]["chance"]) / 10
+    level = int(weather["wet"]["level"])
 
-    if chance <= 0 or type_of_wet == "none":
+    if level <= 0 or type_of_wet == "none":
         display_count(yellow, 1)
 
     else:
         if type_of_wet == "rain":
-            display_count(blue, chance)
+            display_count(blue, level)
         elif type_of_wet == "snow":
-            display_count(white, chance)
+            display_count(white, level)
 
 
 def render_wind(weather):
@@ -156,7 +157,7 @@ example_weather = {
     "temp": "-26",
     "wet": {
         "type": "snow",
-        "chance": "90"
+        "level": "90"
     },
     "wind": "4"
 }
@@ -166,7 +167,7 @@ example_weather2 = {
     "temp": "31",
     "wet": {
         "type": "rain",
-        "chance": "10"
+        "level": "10"
     },
     "wind": "1"
 }
@@ -176,11 +177,17 @@ example_weather3 = {
     "temp": "70",
     "wet": {
         "type": "none",
-        "chance": "0"
+        "level": "0"
     },
     "wind": "0"
 }
 
-render_weather(example_weather)
-render_weather(example_weather2)
-render_weather(example_weather3)
+# render_weather(example_weather)
+# render_weather(example_weather2)
+# render_weather(example_weather3)
+
+api = WeatherAPI()
+weather = api.get_forecast()
+print(weather)
+
+render_weather(weather)
