@@ -14,69 +14,39 @@ key_map = {
     "start": {"pin": 32, "uinput":uinput.KEY_ENTER}
 }
 
-device = uinput.Device([
-    uinput.KEY_LEFT,
-    uinput.KEY_RIGHT,
-    uinput.KEY_UP,
-    uinput.KEY_DOWN,
-    uinput.KEY_X,
-    uinput.KEY_Z,
-    uinput.KEY_ENTER,
-    uinput.KEY_P])
+device_keys = []
+for button in key_map:
+    device_keys.append(key_map[button]["uinput"])
+device = uinput.Device(device_keys)
 
-left = 11
-right = 13
-up = 15
-down = 16
-a = 18
-b = 22
-select = 29
-start = 32
-last_state = {
-    "left": False,
-    "right": False,
-    "up": False,
-    "down": False,
-    "A": False,
-    "B": False,
-    "select": False,
-    "start": False
-}
+#spi_clock = 19
+#spi_mosi = 21
+#spi_miso = 23
+#spi_tft_chip_select = 24
+#spi_data_command_select = 26
 
-spi_clock = 19
-spi_mosi = 21
-spi_miso = 23
-spi_tft_chip_select = 24
-spi_data_command_select = 26
-
-tft_reset = 33
+#tft_reset = 33
 
 gpio.setmode(gpio.BOARD)
 gpio.setwarnings(False)
-gpio.setup(left, gpio.IN, pull_up_down=gpio.PUD_DOWN)
-gpio.setup(right, gpio.IN, pull_up_down=gpio.PUD_DOWN)
-gpio.setup(up, gpio.IN, pull_up_down=gpio.PUD_DOWN)
-gpio.setup(down, gpio.IN, pull_up_down=gpio.PUD_DOWN)
-gpio.setup(a, gpio.IN, pull_up_down=gpio.PUD_DOWN)
-gpio.setup(b, gpio.IN, pull_up_down=gpio.PUD_DOWN)
-gpio.setup(select, gpio.IN, pull_up_down=gpio.PUD_DOWN)
-gpio.setup(start, gpio.IN, pull_up_down=gpio.PUD_DOWN)
+for button in key_map:
+    gpio.setup(key_map[button]["pin"], gpio.IN, pull_up_down=gpio.PUD_DOWN)
 
-gpio.setup(spi_clock, gpio.OUT)
-gpio.setup(spi_mosi, gpio.OUT)
-gpio.setup(spi_miso, gpio.OUT)
-gpio.setup(spi_tft_chip_select, gpio.OUT)
-gpio.setup(spi_data_command_select, gpio.OUT)
+#gpio.setup(spi_clock, gpio.OUT)
+#gpio.setup(spi_mosi, gpio.OUT)
+#gpio.setup(spi_miso, gpio.OUT)
+#gpio.setup(spi_tft_chip_select, gpio.OUT)
+#gpio.setup(spi_data_command_select, gpio.OUT)
 
-gpio.setup(tft_reset, gpio.OUT)
+#gpio.setup(tft_reset, gpio.OUT)
 
-gpio.output(spi_clock, False)
-gpio.output(spi_mosi, False)
-gpio.output(spi_miso, False)
-gpio.output(spi_tft_chip_select, False)
-gpio.output(spi_data_command_select, False)
+#gpio.output(spi_clock, False)
+#gpio.output(spi_mosi, False)
+#gpio.output(spi_miso, False)
+#gpio.output(spi_tft_chip_select, False)
+#gpio.output(spi_data_command_select, False)
 
-gpio.output(tft_reset, False)
+#gpio.output(tft_reset, False)
 
 
 #spi = spidev.SpiDev()
@@ -99,22 +69,6 @@ gpio.output(tft_reset, False)
 
 while True:
     time.sleep(1/120)
-    state = {
-        "left": gpio.input(left),
-        "right": gpio.input(right),
-        "up": gpio.input(up),
-        "down": gpio.input(down),
-        "A": gpio.input(a),
-        "B": gpio.input(b),
-        "select": gpio.input(select),
-        "start": gpio.input(start)
-    }
-    for button in state:
-        #if state[button] != last_state[button]:
-        if state[button]:
-            #print("pressed " + button)
+    for button in key_map:
+        if gpio.input(key_map[button]["pin"]):
             device.emit_click(key_map[button]["uinput"])
-            #else:
-                #print("released " + button)
-
-    last_state = state
